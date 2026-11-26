@@ -1,0 +1,6 @@
+id=cfr
+name=cfr
+version=1.0
+versionCode=1
+author=S0524
+description=📦 cfr - 为 Android 设备提供 Clash (mihomo) 透明代理 🚀 支持 TUN/TPROXY/Redirect 等模式
