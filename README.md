@@ -23,7 +23,7 @@ Magisk / KernelSU / APatch 模块，为 Android 提供 Clash (mihomo) 全局透�
 | `mihomo/dashboard/`、`mihomo/providers/` | `scripts/`、`module.prop`、`webroot/` 等代码文件 |
 | `package.list.cfg`、`gid.list.cfg`、`ap.list.cfg`、`crontab.cfg` | `log/`、`run/`：清空重建，PID、UID 映射、能力缓存全部丢失 |
 
-`mihomo/` 下除 `geoip.dat`、`geosite.dat`、`dashboard/` 以外的文件（自建 rule-provider、证书、`Country.mmdb` 等）**不会保留**，需要自己备份。安装收尾还会删除 `bin/backup/`、全部 `*.log` 与 `*.bak`；已存在的组件直接跳过、不重新下载。
+`mihomo/` 下除 `geoip.dat`、`geosite.dat`、`dashboard/`、`providers/` 以外的文件（自建 rule-provider、证书、`Country.mmdb` 等）**不会保留**，需要自己备份。安装收尾还会删除 `bin/backup/`、全部 `*.log` 与 `*.bak`；已存在的组件直接跳过、不重新下载。
 
 ### 内置组件（可选）
 
@@ -143,7 +143,7 @@ cfr.zip
 │   │   └── curl              下载工具
 │   ├── geoip.dat             GeoX 数据
 │   ├── geosite.dat           GeoX 数据
-│   └── zashboard.zip             面板压缩包
+│   └── zashboard.zip         面板压缩包
 └── webroot/                  管理器入口页面（http://127.0.0.1:23450/ui/）
 ```
 
@@ -163,6 +163,7 @@ cfr.zip
 │   ├── config.yaml           运行时配置
 │   ├── geoip.dat             地理数据
 │   ├── geosite.dat           域名数据
+│   ├── providers/            节点订阅缓存
 │   └── dashboard/            面板
 ├── log/                      日志目录，每次启动前清空
 │   ├── runs.log              模块运行日志
@@ -186,15 +187,13 @@ cfr.zip
 
 ## 常见问题
 
-| 现象 | 处理 |
-|---|---|
-| 面板打不开 | `service.sh status` 确认内核在跑 → 看 `log/mihomo.log` → `tool.sh upxui` 重下面板 |
-| 能连上但上不了网 | 确认 `config.yaml` 里有 `proxies:`；看 `log/mihomo.log`；`iptables -t nat -S \| head -20` |
-| 提示 `Can't find geoip.dat` / `geosite.dat` | `tool.sh upgeox_all` 后 `service.sh restart` |
-| `config.yaml` 丢失 | 启动时自动尝试从订阅补回（限时 10 秒）；失败需手动放回或重新 `tool.sh subs` |
-| 内核启动失败 | 自动打印内核日志末尾，并重下订阅后重试一次；仍失败则停止服务、模块描述显示「内核启动失败」，详情见 `log/mihomo.log` |
-| 改了 settings.ini 不生效 | `service.sh restart` |
-| 安装时在线下载失败 | 手工放文件到 `bin/mihomo`、`bin/curl`、`mihomo/geoip.dat`、`mihomo/geosite.dat`、`mihomo/dashboard/`，再 `service.sh restart` |
+- **面板打不开**：先运行 `service.sh status` 确认内核在跑，再查看 `log/mihomo.log`；必要时执行 `tool.sh upxui` 重下面板，浏览器确认访问 `http://127.0.0.1:23450/ui/` 并填写 `secret`。
+- **能连上但上不了网**：确认 `config.yaml` 里已有 `proxies:` 或有效的 `proxy-providers` 节点缓存，排查 `log/mihomo.log`，并检查转发规则（`iptables -t nat -S | head -20`）。
+- **提示 `Can't find geoip.dat` / `geosite.dat`**：执行 `tool.sh upgeox_all` 后运行 `service.sh restart`。
+- **`config.yaml` 丢失**：当 `update_subscription="true"` 时启动会自动尝试从订阅补回（限时 10 秒）；保持默认 `"false"` 时需手动放回 `config.yaml`（或临时开启后执行 `tool.sh subs`）。
+- **内核启动失败**：自动打印内核日志末尾，并重下订阅后重试一次（开启订阅更新时）；仍失败则停止服务、模块描述显示「内核启动失败」，详情见 `log/mihomo.log`。
+- **改了 `settings.ini` 不生效**：执行 `service.sh restart`。
+- **安装时在线下载失败**：手动将对应文件放入 `bin/mihomo`、`bin/curl`、`mihomo/geoip.dat`、`mihomo/geosite.dat`、`mihomo/dashboard/`，然后执行 `service.sh restart`。
 
 ## 卸载
 
